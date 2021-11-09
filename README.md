@@ -1,2 +1,2 @@
-# Coffee-Machine
-https://hyperskill.org/projects/33
+# Implementation of:
+  * https://hyperskill.org/projects/33
