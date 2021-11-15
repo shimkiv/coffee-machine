@@ -1,3 +1,3 @@
 # Implementation of:
-  * https://hyperskill.org/projects/33
-  * https://hyperskill.org/projects/133
+  * [Coffee Machine](https://hyperskill.org/projects/33)
+  * [Cinema Room Manager](https://hyperskill.org/projects/133)
