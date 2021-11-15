@@ -34,7 +34,7 @@ public class Cinema {
           cinema.getFirstCinemaHall().printCinemaHallSchema();
 
           break;
-        case BUY_CINEMA_TICKET:
+        case BUY_CINEMA_HALL_TICKET:
           cinema.getFirstCinemaHall().bookSeat(scanner);
 
           break;
@@ -60,6 +60,7 @@ public class Cinema {
     System.out.println();
     System.out.println("1. Show the seats");
     System.out.println("2. Buy a ticket");
+    System.out.println("3. Statistics");
     System.out.println("0. Exit");
 
     return Event.getInstance(scanner.nextInt());
@@ -183,7 +184,8 @@ class CinemaHall {
 
 enum Event {
   PRINT_CINEMA_HALL_SCHEMA(1),
-  BUY_CINEMA_TICKET(2),
+  BUY_CINEMA_HALL_TICKET(2),
+  PRINT_CINEMA_HALL_STATS(3),
   EXIT(0);
 
   private final int code;
