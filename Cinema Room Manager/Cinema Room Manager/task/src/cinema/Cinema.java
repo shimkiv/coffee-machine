@@ -35,7 +35,11 @@ public class Cinema {
 
           break;
         case BUY_CINEMA_HALL_TICKET:
-          cinema.getFirstCinemaHall().bookSeat(scanner);
+          cinema.getFirstCinemaHall().bookCinemaHallSeat(scanner);
+
+          break;
+        case PRINT_CINEMA_HALL_STATS:
+          cinema.getFirstCinemaHall().printCinemaHallStats();
 
           break;
         default:
@@ -68,14 +72,18 @@ public class Cinema {
 }
 
 class CinemaHall {
+  private int income;
   private final int rows;
   private final int seatsInRow;
+  private int purchasedTickets;
   private final String[][] schema;
 
   CinemaHall(int rows, int seatsInRow) {
+    this.income = 0;
     this.rows = rows;
     this.seatsInRow = seatsInRow;
-    this.schema = generateCinemaHallSchema();
+    this.purchasedTickets = 0;
+    this.schema = generateSchema();
   }
 
   public void printCinemaHallSchema() {
@@ -84,28 +92,50 @@ class CinemaHall {
     print2dArray(getSchema());
   }
 
-  public void printCinemaHallIncome() {
-    System.out.println();
-    System.out.println("Total income:");
-    System.out.println(Cinema.CURRENCY_SYMBOL + calculateCinemaHallIncome());
+  public void bookCinemaHallSeat(Scanner scanner) {
+    while (true) {
+      try {
+        System.out.println();
+        System.out.println("Enter a row number:");
+        int rowNumber = scanner.nextInt();
+        System.out.println("Enter a seat number in that row:");
+        int seatNumber = scanner.nextInt();
+
+        if (rowNumber == 0 || seatNumber == 0) {
+          throw new NullPointerException();
+        }
+
+        Availability seatAvailability =
+            Availability.getInstance(getSchema()[rowNumber][seatNumber]);
+
+        if (Availability.BOOKED.equals(seatAvailability)) {
+          System.out.println();
+          System.out.println("That ticket has already been purchased!");
+        } else {
+          int ticketPrice = calculateTicketPrice(rowNumber);
+
+          System.out.println();
+          System.out.printf("Ticket price: %s%d%n", Cinema.CURRENCY_SYMBOL, ticketPrice);
+
+          incrementIncome(ticketPrice);
+          incrementPurchasedTickets();
+          getSchema()[rowNumber][seatNumber] = Availability.BOOKED.getCode();
+
+          break;
+        }
+      } catch (ArrayIndexOutOfBoundsException | NullPointerException e) {
+        System.out.println();
+        System.out.println("Wrong input!");
+      }
+    }
   }
 
-  public void printCinemaHallTicketPrice(int rowNumber) {
+  public void printCinemaHallStats() {
     System.out.println();
-    System.out.printf(
-        "Ticket price: %s%d%n", Cinema.CURRENCY_SYMBOL, calculateCinemaHallTicketPrice(rowNumber));
-  }
-
-  public void bookSeat(Scanner scanner) {
-    System.out.println();
-    System.out.println("Enter a row number:");
-    int rowNumber = scanner.nextInt();
-    System.out.println("Enter a seat number in that row:");
-    int seatNumber = scanner.nextInt();
-
-    printCinemaHallTicketPrice(rowNumber);
-
-    getSchema()[rowNumber][seatNumber] = Availability.BOOKED.getCode();
+    System.out.printf("Number of purchased tickets: %d%n", getPurchasedTickets());
+    System.out.printf("Percentage: %.2f%s%n", calculateBookedSeatsToTotalSeatsPercentage(), "%");
+    System.out.printf("Current income: %s%d%n", Cinema.CURRENCY_SYMBOL, getIncome());
+    System.out.printf("Total income: %s%d%n", Cinema.CURRENCY_SYMBOL, calculateTotalIncome());
   }
 
   private int getRows() {
@@ -116,6 +146,22 @@ class CinemaHall {
     return seatsInRow;
   }
 
+  private int getIncome() {
+    return income;
+  }
+
+  private void incrementIncome(int ticketPrice) {
+    this.income += ticketPrice;
+  }
+
+  private int getPurchasedTickets() {
+    return purchasedTickets;
+  }
+
+  private void incrementPurchasedTickets() {
+    this.purchasedTickets += 1;
+  }
+
   private String[][] getSchema() {
     return schema;
   }
@@ -124,7 +170,7 @@ class CinemaHall {
     return getRows() * getSeatsInRow();
   }
 
-  private String[][] generateCinemaHallSchema() {
+  private String[][] generateSchema() {
     String[][] array = new String[getRows() + 1][getSeatsInRow() + 1];
 
     for (int i = 0; i < array.length; i++) {
@@ -144,7 +190,7 @@ class CinemaHall {
     return array;
   }
 
-  private int calculateCinemaHallTicketPrice(int rowNumber) {
+  private int calculateTicketPrice(int rowNumber) {
     int totalSeats = getTotalSeats();
 
     if (totalSeats <= Cinema.SMALL_MEDIUM_ROOM_SIZE) {
@@ -156,7 +202,7 @@ class CinemaHall {
     }
   }
 
-  private int calculateCinemaHallIncome() {
+  private int calculateTotalIncome() {
     int totalSeats = getTotalSeats();
 
     if (totalSeats <= Cinema.SMALL_MEDIUM_ROOM_SIZE) {
@@ -169,6 +215,10 @@ class CinemaHall {
 
       return frontHalfSeatsPrice + backHalfSeatsPrice;
     }
+  }
+
+  private double calculateBookedSeatsToTotalSeatsPercentage() {
+    return 100.0 * (getPurchasedTickets() / (double) getTotalSeats());
   }
 
   private void print2dArray(String[][] array) {
@@ -228,5 +278,4 @@ enum Availability {
 
     return null;
   }
-  
 }
